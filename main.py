@@ -574,12 +574,13 @@ async def command(request: Request, body: CommandRequest):
         _delete_session(body.session_token)
         raise _FAIL
 
-    # Validate command
-    if body.command not in ("ARM", "DISARM"):
+    # Normalize command (accept any casing)
+    cmd = body.command.strip().upper()
+    if cmd not in ("ARM", "DISARM"):
         raise HTTPException(status_code=400, detail="Invalid command. Must be ARM or DISARM")
 
     # DISARM requires PIN verification (server-side enforcement)
-    if body.command == "DISARM":
+    if cmd == "DISARM":
         if not body.pin_hash:
             raise _FAIL
         # Check escalating lockout for this device
@@ -594,7 +595,7 @@ async def command(request: Request, body: CommandRequest):
     if len(device["queue"]) >= MAX_QUEUE_SIZE:
         raise HTTPException(status_code=429, detail="Too many pending commands. Please wait.")
 
-    device["queue"].append(body.command)
+    device["queue"].append(cmd)
     return {"status": "ok"}
 
 
@@ -664,5 +665,3 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(app, host="0.0.0.0", port=10000)
-
-
