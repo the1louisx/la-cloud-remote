@@ -65,7 +65,7 @@ MAX_ACTIVE_SESSIONS = 1000             # global cap
 # CORS  [HARDENED] — set ALLOWED_ORIGINS env var to your GitHub Pages URL
 ALLOWED_ORIGINS = os.environ.get(
     "ALLOWED_ORIGINS",
-    "https://laoftware.github.io"
+    "*"
 ).split(",")
 
 EVENTS_LOG_PATH = Path("events.log")
