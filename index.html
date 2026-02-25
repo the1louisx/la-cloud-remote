@@ -454,10 +454,10 @@
                         window.history.replaceState({}, document.title, cleanUrl);
                     }
 
-                    // Show armed screen immediately, send ARM in background
+                    // Paired — show armed screen (ARM sent in background, harmless if already armed)
                     busy = false;
                     showArmedScreen();
-                    doArm();
+                    doArm(); // fire-and-forget, won't block UI
                 } else if (resp.status === 403) {
                     shakeDots();
                     showMessage('pin-message', 'Wrong PIN or expired QR', true);

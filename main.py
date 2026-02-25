@@ -62,8 +62,11 @@ MAX_ACTIVE_PAIRING_TOKENS = 500        # global cap to bound memory
 SESSION_TTL_SECONDS = 86400            # 24 hours
 MAX_ACTIVE_SESSIONS = 1000             # global cap
 
-# CORS
-ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "*").split(",")
+# CORS  [HARDENED] — set ALLOWED_ORIGINS env var to your GitHub Pages URL
+ALLOWED_ORIGINS = os.environ.get(
+    "ALLOWED_ORIGINS",
+    "https://laoftware.github.io"
+).split(",")
 
 EVENTS_LOG_PATH = Path("events.log")
 
@@ -91,9 +94,25 @@ class LimitRequestSizeMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         content_length = request.headers.get("content-length")
-        if content_length and int(content_length) > MAX_REQUEST_BODY_BYTES:
-            return Response("Request body too large", status_code=413)
+        if content_length:
+            try:
+                if int(content_length) > MAX_REQUEST_BODY_BYTES:
+                    return Response("Request body too large", status_code=413)
+            except ValueError:
+                return Response("Invalid Content-Length", status_code=400)
         return await call_next(request)
+
+
+# ---------------------------------------------------------------------------
+# Security headers middleware  [HARDENED]
+# ---------------------------------------------------------------------------
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        return response
 
 
 # ---------------------------------------------------------------------------
@@ -125,6 +144,7 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(LimitRequestSizeMiddleware)
+app.add_middleware(SecurityHeadersMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
