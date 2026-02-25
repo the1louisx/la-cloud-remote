@@ -62,10 +62,10 @@ MAX_ACTIVE_PAIRING_TOKENS = 500        # global cap to bound memory
 SESSION_TTL_SECONDS = 86400            # 24 hours
 MAX_ACTIVE_SESSIONS = 1000             # global cap
 
-# CORS  [HARDENED] — set ALLOWED_ORIGINS env var to your GitHub Pages URL
+# CORS  [HARDENED] — only the phone web UI needs browser access
 ALLOWED_ORIGINS = os.environ.get(
     "ALLOWED_ORIGINS",
-    "*"
+    "https://laoftware.github.io"
 ).split(",")
 
 EVENTS_LOG_PATH = Path("events.log")
