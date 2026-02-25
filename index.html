@@ -398,29 +398,6 @@
             }
         });
 
-        document.addEventListener('keydown', function(e) {
-            if (busy) return;
-            if (document.getElementById('pin-screen').style.display === 'none') return;
-
-            if (e.key >= '0' && e.key <= '9' && pin.length < 4) {
-                pin += e.key;
-                hiddenInput.value = pin;
-                updateDots();
-                if (pin.length === 4) {
-                    busy = true;
-                    if (pinMode === 'pairing') {
-                        doPair();
-                    } else {
-                        doDisarmWithPin();
-                    }
-                }
-            } else if (e.key === 'Backspace' && pin.length > 0) {
-                pin = pin.slice(0, -1);
-                hiddenInput.value = pin;
-                updateDots();
-            }
-        });
-
         // --- Pair (QR token + PIN) ---
         async function doPair() {
             if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
