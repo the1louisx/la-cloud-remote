@@ -287,7 +287,7 @@ def cleanup_old_devices():
 
 def append_usage_event(e: "UsageEvent") -> None:
     record = {
-        "user_id": e.user_id,
+        "device_id": e.device_id,
         "event": e.event,
         "timestamp": e.timestamp,
         "received_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
