@@ -219,7 +219,7 @@
 
         <!-- PIN entry screen (used for initial pairing AND disarm PIN) -->
         <div id="pin-screen">
-            <input type="tel" id="hidden-pin" class="hidden-input" maxlength="4" inputmode="numeric" autocomplete="off">
+            <input type="text" id="hidden-pin" class="hidden-input" maxlength="4" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
 
             <div class="pin-dots" id="pin-dots" onclick="focusInput()">
                 <div class="pin-dot" id="dot0"><span class="pin-dot-inner" id="txt0"></span></div>
@@ -386,28 +386,19 @@
         const hiddenInput = document.getElementById('hidden-pin');
 
         hiddenInput.addEventListener('beforeinput', function(e) {
-            // Block the browser from changing the input — we handle it ourselves
             e.preventDefault();
-
             if (busy) return;
 
             if (e.inputType === 'insertText' && e.data && /^\d/.test(e.data) && pin.length < 4) {
-                // Only take the FIRST digit, ignore everything else
                 pin += e.data.charAt(0);
-                this.value = pin;
                 updateDots();
-
                 if (pin.length === 4) {
                     busy = true;
-                    if (pinMode === 'pairing') {
-                        doPair();
-                    } else {
-                        doDisarmWithPin();
-                    }
+                    if (pinMode === 'pairing') doPair();
+                    else doDisarmWithPin();
                 }
             } else if (e.inputType === 'deleteContentBackward' && pin.length > 0) {
                 pin = pin.slice(0, -1);
-                this.value = pin;
                 updateDots();
             }
         });
