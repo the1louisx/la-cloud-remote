@@ -385,30 +385,9 @@
         // --- Hidden input handler ---
         const hiddenInput = document.getElementById('hidden-pin');
 
-        // Debounce to prevent mobile double-fire
-        let inputLocked = false;
-        hiddenInput.addEventListener('input', function(e) {
-            if (inputLocked) {
-                this.value = pin;
-                return;
-            }
-            inputLocked = true;
-            setTimeout(() => { inputLocked = false; }, 50);
-
-            // Figure out what the user typed
-            const raw = this.value.replace(/\D/g, '');
-
-            if (raw.length > pin.length && pin.length < 4) {
-                // User added a digit — only take ONE new digit
-                pin += raw.charAt(raw.length - 1);
-            } else if (raw.length < pin.length) {
-                // User deleted
-                pin = pin.slice(0, -1);
-            }
-            pin = pin.slice(0, 4);
-
-            // Force input to match our tracked PIN
-            this.value = pin;
+        hiddenInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 4);
+            pin = this.value;
             updateDots();
 
             if (pin.length === 4 && !busy) {
