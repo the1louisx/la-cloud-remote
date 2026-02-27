@@ -385,18 +385,30 @@
         // --- Hidden input handler ---
         const hiddenInput = document.getElementById('hidden-pin');
 
-        hiddenInput.addEventListener('input', function() {
-            this.value = this.value.replace(/\D/g, '').slice(0, 4);
-            pin = this.value;
-            updateDots();
+        hiddenInput.addEventListener('beforeinput', function(e) {
+            // Block the browser from changing the input — we handle it ourselves
+            e.preventDefault();
 
-            if (pin.length === 4 && !busy) {
-                busy = true;
-                if (pinMode === 'pairing') {
-                    doPair();
-                } else {
-                    doDisarmWithPin();
+            if (busy) return;
+
+            if (e.inputType === 'insertText' && e.data && /^\d/.test(e.data) && pin.length < 4) {
+                // Only take the FIRST digit, ignore everything else
+                pin += e.data.charAt(0);
+                this.value = pin;
+                updateDots();
+
+                if (pin.length === 4) {
+                    busy = true;
+                    if (pinMode === 'pairing') {
+                        doPair();
+                    } else {
+                        doDisarmWithPin();
+                    }
                 }
+            } else if (e.inputType === 'deleteContentBackward' && pin.length > 0) {
+                pin = pin.slice(0, -1);
+                this.value = pin;
+                updateDots();
             }
         });
 
